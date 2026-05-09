@@ -358,7 +358,7 @@
 
   <!-- FMD Keolis -->
   <div class="fmd-block">
-    <div class="fmd-title">💚 Forfait Mobilités Durables - chez KDM</div>
+    <div class="fmd-title">💚 Forfait Mobilités Durables</div>
     <div class="fmd-grid">
       <div class="fmd-item">
         <div class="fi-value">100 €</div>
@@ -374,7 +374,7 @@
       </div>
     </div>
     <div style="margin-top:0.7rem; font-size:0.85rem; opacity:0.8;">
-      👉 Et si vous souhaitez élargir l'assiette aux trottinettes et rollers, c'est un sujet à porter au CSE.
+      👉 Renseignez-vous auprès de votre employeur : certaines entreprises remboursent jusqu'à 700 €/an.
     </div>
   </div>
 
@@ -384,8 +384,8 @@
     <div class="fun-icons">
       <span class="fi">🚲 Vélo classique</span>
       <span class="fi">⚡🚲 Vélo électrique</span>
-      <span class="fi fun">🛼 Rollers <small>(pas encore chez KDM)</small></span>
-      <span class="fi fun">🛴 Trottinette <small>(pas encore chez KDM)</small></span>
+      <span class="fi fun">🛼 Rollers <small>(selon employeur)</small></span>
+      <span class="fi fun">🛴 Trottinette <small>(selon employeur)</small></span>
       <span class="fi fun">🐴 Cheval <small>(et bonne route !)</small></span>
     </div>
   </div>
@@ -464,3 +464,13 @@
   </div>
 
 </div>
+	<script>
+function toggleDetail(btn) {
+  const panel = btn.nextElementSibling;
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  const arrow = btn.querySelector('span');
+  if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
+}
+</script>
