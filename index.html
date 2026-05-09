@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éco-Quiz KDM - Animation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --divia-magenta: #D2007A;
+            --divia-magenta-dark: #A80062;
+            --divia-purple: #2D1B4E;
+            --team-blue: #1E88E5;
+            --team-blue-glow: rgba(30, 136, 229, 0.4);
+            --team-red: #E53935;
+            --team-red-glow: rgba(229, 57, 53, 0.4);
+            --success: #43A047;
+            --warning: #FFA726;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, var(--divia-purple) 0%, #1a1030 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        /* Start screen */
+        .start-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+        .start-screen.hidden { display: none; }
+        .start-logo { font-size: 5rem; margin-bottom: 1rem; }
+        .start-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .start-title span { color: var(--divia-magenta); }
+        .start-subtitle { font-size: 1.3rem; opacity: 0.7; margin-bottom: 3rem; }
+
+        .mode-selector { display: flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; justify-content: center; }
+        .mode-card {
+            background: rgba(0,0,0,0.3); border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 2rem; width: 280px; cursor: pointer; transition: all 0.3s ease;
+        }
+        .mode-card:hover { border-color: var(--divia-magenta); transform: translateY(-5px); }
+        .mode-card.selected { border-color: var(--divia-magenta); background: rgba(210, 0, 122, 0.2); }
+        .mode-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .mode-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .mode-desc { font-size: 0.9rem; opacity: 0.7; }
+
+        .btn { padding: 1.2rem 3rem; border: none; border-radius: 12px; font-family: inherit; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .btn-primary { background: var(--divia-magenta); color: white; }
+        .btn-primary:hover { background: var(--divia-magenta-dark); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(210, 0, 122, 0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .loading-info { margin-top: 2rem; font-size: 0.9rem; opacity: 0.7; }
+
+        /* Main screen */
+        .main-screen { display: none; min-height: 100vh; }
+        .main-screen.active { display: block; }
+
+        .header { background: rgba(0,0,0,0.3); padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
+        .header-left { display: flex; align-items: center; gap: 1.5rem; }
+        .logo { font-size: 1.4rem; font-weight: 900; }
+        .logo span { color: var(--divia-magenta); }
+        .mode-badge { background: var(--divia-magenta); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 2rem; }
+        .qr-code-container {
+    position: relative;
+}
+
+.qr-code-btn {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.qr-code-btn:hover {
+    background: var(--divia-magenta);
+    border-color: white;
+}
+
+.qr-code-popup {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 100;
+    text-align: center;
+}
+
+.qr-code-popup.active {
+    display: block;
+}
+
+.qr-code-popup img {
+    width: 200px;
+    height: 200px;
+    border: 3px solid var(--divia-magenta);
+    border-radius: 8px;
+}
+
+.qr-code-url {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #333;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+/* QR code dans l'écran de démarrage */
+.start-qr {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.start-qr img {
+    width: 250px;
+    height: 250px;
+    border: 4px solid var(--divia-magenta);
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    background: white;
+    padding: 1rem;
+}
+
+.start-qr-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.start-qr-url {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    word-break: break-all;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Bouton démarrer manuel */
+.ready-controls {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.participants-ready {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 1rem 2rem;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.participants-ready .count {
+    color: var(--divia-magenta);
+    font-size: 1.5rem;
+}
+        .participants { display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.5rem 1rem; border-radius: 20px; }
+        .master-timer { font-size: 2rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+        .main-layout { display: grid; grid-template-columns: 1fr; gap: 0.8rem; padding: 0.8rem 2rem; max-width: 1400px; margin: 0 auto; }
+
+        /* Scores */
+        .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .team-card {
+            background: rgba(0,0,0,0.3); border-radius: 16px; padding: 0.8rem 1.2rem;
+            text-align: center; position: relative; overflow: hidden; transition: all 0.5s ease;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .team-card.blue { border: 2px solid var(--team-blue); box-shadow: 0 0 30px var(--team-blue-glow); }
+        .team-card.red { border: 2px solid var(--team-red); box-shadow: 0 0 30px var(--team-red-glow); }
+        .team-card.leading { transform: scale(1.03); }
+        .team-card.scoring { animation: scoreFlash 0.8s ease-out; }
+        @keyframes scoreFlash {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.1); box-shadow: 0 0 60px currentColor; }
+            100% { transform: scale(1); }
+        }
+        .team-card.blue.scoring { box-shadow: 0 0 80px var(--team-blue); }
+        .team-card.red.scoring { box-shadow: 0 0 80px var(--team-red); }
+        .team-icon { font-size: 2rem; }
+        .team-info { text-align: left; flex: 1; }
+        .team-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .team-label.blue { color: var(--team-blue); }
+        .team-label.red { color: var(--team-red); }
+        .team-score { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+        .team-score.blue { color: var(--team-blue); }
+        .team-score.red { color: var(--team-red); }
+        .team-members { font-size: 0.75rem; opacity: 0.6; }
+
+        /* Question */
+        .question-section { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 1rem 1.5rem; }
+        .question-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+        .question-badge { background: var(--divia-magenta); padding: 0.4rem 1.2rem; border-radius: 30px; font-weight: 700; font-size: 0.9rem; }
+        .phase-indicator { padding: 0.4rem 1.2rem; border-radius: 30px; font-weight: 700; font-size: 0.9rem; }
+        .phase-indicator.vote { background: var(--warning); color: #333; }
+        .phase-indicator.explain { background: var(--success); }
+        .question-timer { font-size: 2.5rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .question-timer.warning { color: var(--warning); }
+        .question-timer.danger { color: var(--team-red); animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .question-text { font-size: 1.5rem; font-weight: 700; line-height: 1.3; text-align: center; margin-bottom: 1rem; }
+
+        /* Options + répartition intégrée */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .option-card {
+    background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px; 
+    padding: 1rem 1.2rem;  /* ← Augmenté de 0.6rem à 1rem */
+    display: flex; align-items: center; gap: 0.8rem;  /* ← Augmenté de 0.6rem à 0.8rem */
+    transition: all 0.3s ease;
+    position: relative; overflow: hidden;
+    min-height: 60px;  /* ← Hauteur minimum pour plus de confort */
+}
+.option-letter { 
+    width: 40px; height: 40px;  /* ← Augmenté de 32px à 40px */
+    border-radius: 50%; background: rgba(255,255,255,0.2); 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 1.2rem;  /* ← Augmenté de 1rem à 1.2rem */
+    font-weight: 800; flex-shrink: 0; 
+}
+.option-text { 
+    font-size: 1.1rem;  /* ← Augmenté de 0.95rem à 1.1rem */
+    font-weight: 600; flex: 1; line-height: 1.4;  /* ← Meilleure lisibilité */
+}
+.option-count { 
+    font-size: 1rem;  /* ← Augmenté de 0.85rem à 1rem */
+    font-weight: 800; opacity: 0.8; min-width: 35px; text-align: right; 
+}
+       
+        .option-card.correct { background: var(--success); border-color: var(--success); transform: scale(1.02); }
+        .option-card.correct .option-bar-fill { background: rgba(255,255,255,0.4); }
+        .option-card.wrong { opacity: 0.4; }
+
+        /* Info */
+
+        .info-section {
+    display: none !important;  /* ← Masquer définitivement l'ancienne */
+}
+        .info-section { display: none; background: rgba(0,0,0,0.3); border-radius: 16px; overflow: visible; }
+        .info-section.active { display: block; }
+        .info-header { background: var(--success); padding: 0.8rem 1.5rem; font-size: 1.1rem; font-weight: 700; }
+        .info-body { padding: 1.2rem 1.5rem; font-size: 1.1rem; line-height: 1.6;transform: scale(1.4); transform-origin: top center;padding-bottom: 90%; }
+        .info-body .highlight { background: var(--divia-magenta); padding: 0.2rem 0.6rem; border-radius: 6px; }
+        .info-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .info-body th, .info-body td { padding: 0.6rem 0.8rem; border: 1px solid rgba(255,255,255,0.2); text-align: left; }
+        .info-body th { background: rgba(255,255,255,0.1); }
+
+        /* Timer bar */
+        .timer-bar-section { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 0.6rem 1rem; }
+        .timer-bar-label { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.85rem; }
+        .timer-bar { height: 16px; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; display: flex; }
+        .timer-bar-vote { background: var(--warning); height: 100%; transition: width 0.3s ease; }
+        .timer-bar-explain { background: var(--success); height: 100%; transition: width 0.3s ease; }
+
+        /* Écran de fin */
+        .end-screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+        .end-screen.active { display: flex; }
+        .end-icon { font-size: 5rem; margin-bottom: 1rem; }
+        .end-title { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .end-title span { color: var(--divia-magenta); }
+        .end-scores { display: flex; gap: 3rem; margin: 2rem 0; }
+        .end-team { text-align: center; }
+        .end-team-score { font-size: 5rem; font-weight: 900; line-height: 1; }
+        .end-team-score.blue { color: var(--team-blue); }
+        .end-team-score.red { color: var(--team-red); }
+        .end-team-label { font-size: 1.2rem; font-weight: 700; opacity: 0.8; }
+        .end-winner { font-size: 1.5rem; font-weight: 800; margin-top: 1rem; padding: 1rem 2rem; border-radius: 20px; }
+        .end-winner.blue { background: rgba(30, 136, 229, 0.3); color: var(--team-blue); }
+        .end-winner.red { background: rgba(229, 57, 53, 0.3); color: var(--team-red); }
+        .end-winner.tie { background: rgba(255,255,255,0.1); }
+        .btn-restart { margin-top: 2rem; }
+
+        @media (max-width: 900px) {
+            .scoreboard, .options-grid { grid-template-columns: 1fr; }
+            .question-text { font-size: 1.3rem; }
+        }
+        @keyframes spin {
+    to { transform: rotate(360deg); }
+}
+        /* Overlay modal pour les infos pédagogiques */
+.info-overlay {
+    display: none;
+    position: fixed;
+    top: 80px;  /* ← Commence SOUS le header (au lieu de top: 0) */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 16, 48, 0.95);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.info-overlay.active {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.info-overlay-header {
+    display: none;
+}
+
+.info-overlay-header {
+    display: flex;
+    justify-content: flex-end;  /* ← Bouton à droite seulement */
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.info-overlay-title {
+    display: none;  /* ← Cache complètement le titre */
+}
+
+.info-overlay-close {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.info-overlay-close:hover {
+    background: var(--team-red);
+    border-color: white;
+}
+
+.info-overlay-content {
+    flex: 1;
+    background: rgba(20, 10, 40, 0.98);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+
+        .header-center {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 1rem;
+}
+
+.timer-bar-compact {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 0.5rem 0.8rem;
+}
+
+.timer-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.timer-bar-track {
+    height: 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+}
+
+.timer-bar-vote-top {
+    background: var(--warning);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.timer-bar-explain-top {
+    background: var(--success);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Responsive : ajuster pour petits écrans */
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .header-center {
+        width: 100%;
+        max-width: none;
+        order: 3;
+    }
+}
+        /* QR code dans l'écran de démarrage */
+.start-qr {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+#qr-code-start {
+    display: inline-block;
+    padding: 1rem;
+    background: white;
+    border: 4px solid var(--divia-magenta);
+    border-radius: 16px;
+    margin-bottom: 1rem;
+}
+
+#qr-code-start canvas {
+    display: block;
+}
+
+.start-qr-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.start-qr-url {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    word-break: break-all;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* QR dans le popup header */
+#qr-code-header {
+    display: inline-block;
+}
+
+#qr-code-header canvas {
+    display: block;
+    border: 3px solid var(--divia-magenta);
+    border-radius: 8px;
+}
+
+.btn-reset-corner {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: rgba(229, 57, 53, 0.15);
+    border: 2px solid rgba(229, 57, 53, 0.3);
+    color: var(--team-red);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-reset-corner:hover {
+    background: rgba(229, 57, 53, 0.25);
+    border-color: var(--team-red);
+    transform: translateY(-2px);
+}
+
+.btn-reset-corner:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+        
+    </style>
+</head>
+<body>
+    <!-- Start -->
+    <div class="start-screen" id="start-screen">
+         <button class="btn-reset-corner" id="btn-reset" onclick="resetQuiz()">
+        🗑️ Reset
+    </button>
+    <div class="start-logo">🌱</div>
+    <h1 class="start-title">Éco-<span>Quiz</span></h1>
+    <p class="start-subtitle">Keolis Dijon Multimodalité - Interface Animateur</p>
+
+    <div class="mode-selector" id="mode-selector">
+        <div class="mode-card" id="mode-session" onclick="selectMode('session')">
+            <div class="mode-icon">🎯</div>
+            <div class="mode-title">Mode Atelier</div>
+            <div class="mode-desc">Session avec début fixe.<br>Tout le monde commence ensemble.</div>
+        </div>
+        <div class="mode-card" id="mode-loop" onclick="selectMode('loop')">
+            <div class="mode-icon">🔄</div>
+            <div class="mode-title">Mode Va-et-vient</div>
+            <div class="mode-desc">Boucle continue.<br>Arrivées/départs libres.</div>
+        </div>
+    </div>
+   
+
+    <button class="btn btn-primary" id="btn-configure" onclick="configureQuiz()" disabled>⚙️ Configurer</button>
+    
+    <!-- Écran d'attente avec QR code -->
+    <div id="ready-screen" style="display: none;">
+        <div class="start-qr">
+            <div id="qr-code-start"></div>
+            <div class="start-qr-text">📱 Scannez pour rejoindre</div>
+        </div>
+        
+        <div class="ready-controls">
+            <div class="participants-ready">
+                <span class="count" id="ready-count">0</span> participant(s) connecté(s)
+            </div>
+            <button class="btn btn-primary" id="btn-start-now" onclick="startQuizNow()">
+                🚀 Démarrer le quiz maintenant
+            </button>
+        </div>
+    </div>
+    
+    <div class="loading-info" id="loading-info">Chargement de la configuration...</div>
+</div>
+
+
+    <!-- Main -->
+    <div class="main-screen" id="main-screen">
+        <header class="header">
+    <div class="header-left">
+        <div class="logo">🌱 Éco-<span>Quiz</span></div>
+        <div class="mode-badge" id="mode-badge">Mode Atelier</div>
+    </div>
+    
+    <!-- NOUVEAU : Barre de progression au centre -->
+    <div class="header-center">
+        <div class="timer-bar-compact">
+            <div class="timer-bar-labels">
+                <span id="timer-phase-label-top">⏱️ Vote</span>
+                <span id="timer-countdown-top">2:00</span>
+            </div>
+            <div class="timer-bar-track">
+                <div class="timer-bar-vote-top" id="timer-bar-vote-top" style="width: 66.6%"></div>
+                <div class="timer-bar-explain-top" id="timer-bar-explain-top" style="width: 33.3%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="header-right">
+    <div class="qr-code-container">
+        <button class="qr-code-btn" id="qr-toggle">
+            📱 QR Code
+        </button>
+        <div class="qr-code-popup" id="qr-popup">
+            <div id="qr-code-header"></div>
+            <div class="qr-code-url">bourgineo-stack.github.io/quiz-kdm-participant/</div>
+        </div>
+    </div>
+    <div class="participants">👥 <span id="total-participants">0</span> participants <span style="font-size:0.65rem; opacity:0.4;">~30s</span></div>
+    <div class="master-timer" id="master-timer">00:00</div>
+</div>
+</header>
+
+        <main class="main-layout">
+            <section class="scoreboard">
+                <div class="team-card blue" id="card-blue">
+                    <div class="team-icon">🚌</div>
+                    <div class="team-info">
+                        <div class="team-label blue">Équipe Bleue</div>
+                        <div class="team-score blue" id="score-blue">0</div>
+                    </div>
+                    <div class="team-members"><span id="members-blue">0</span> joueurs</div>
+                </div>
+                <div class="team-card red" id="card-red">
+                    <div class="team-icon">🚋</div>
+                    <div class="team-info">
+                        <div class="team-label red">Équipe Rouge</div>
+                        <div class="team-score red" id="score-red">0</div>
+                    </div>
+                    <div class="team-members"><span id="members-red">0</span> joueurs</div>
+                </div>
+            </section>
+
+            <section class="question-section">
+                <div class="question-top">
+                    <div>
+                        <span class="question-badge">Question <span id="q-num">1</span>/<span id="q-total">10</span></span>
+                        <span class="phase-indicator vote" id="phase-badge">⏱️ Solution dans...</span>
+                    </div>
+                    <div class="question-timer" id="question-timer">2:00</div>
+                </div>
+                <div class="question-text" id="question-text">Chargement...</div>
+                <div class="options-grid" id="options-grid"></div>
+            </section>
+
+            <section class="info-section" id="info-section">
+                <div class="info-header">💡 Le saviez-vous ?</div>
+                <div class="info-body" id="info-body"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Écran de fin -->
+    <div class="end-screen" id="end-screen">
+        <div class="end-icon">🏆</div>
+        <h1 class="end-title">Éco-<span>Quiz</span> terminé !</h1>
+        <div class="end-scores">
+            <div class="end-team">
+                <div class="end-team-score blue" id="end-score-blue">0</div>
+                <div class="end-team-label">🚌 Équipe Bleue</div>
+            </div>
+            <div class="end-team">
+                <div class="end-team-score red" id="end-score-red">0</div>
+                <div class="end-team-label">🚋 Équipe Rouge</div>
+            </div>
+        </div>
+        <div class="end-winner" id="end-winner"></div>
+        <button class="btn btn-primary btn-restart" onclick="location.reload()">🔄 Nouvelle session</button>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        
+        const $ = id => document.getElementById(id);
+
+        // Init
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loaded = await loadConfigFromSheet();
+            if (loaded && QUESTIONS.length > 0) {
+                $('loading-info').textContent = `✓ ${QUESTIONS.length} questions chargées`;
+                $('q-total').textContent = QUESTIONS.length;
+            } else {
+                $('loading-info').textContent = '❌ Erreur de chargement';
+            }
+        });
+
+        // État enrichi
+const state = { 
+    mode: null, 
+    referenceTime: null, 
+    lastQuestionIndex: -1, 
+    lastPhase: null, 
+    scoreTriggered: {}, 
+    preloadedContent: {},
+    pendingScores: null,
+    scoreCalculating: false,
+    lastScoreTimestamp: 0,
+    isFirstQuestion: true,  // ← NOUVEAU
+    isCountdown: false,
+    configured: false,        // ← NOUVEAU 
+    recalibrated: false,
+    recalibrated2: false
+};
+
+// Génération QR code
+function generateQRCodes() {
+    const url = 'https://bourgineo-stack.github.io/quiz-kdm-participant/';
+    
+    // QR dans l'écran de démarrage
+    const qrStart = $('qr-code-start');
+    if (qrStart) {
+        qrStart.innerHTML = ''; // Clear
+        new QRCode(qrStart, {
+            text: url,
+            width: 250,
+            height: 250,
+            colorDark: "#D2007A",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+    
+    // QR dans le header (sera généré au premier affichage)
+    const qrHeader = $('qr-code-header');
+    if (qrHeader && qrHeader.innerHTML === '') {
+        new QRCode(qrHeader, {
+            text: url,
+            width: 200,
+            height: 200,
+            colorDark: "#D2007A",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+}
+
+// Toggle QR popup dans le header
+document.addEventListener('DOMContentLoaded', () => {
+    generateQRCodes();
+    
+    const qrToggle = $('qr-toggle');
+    const qrPopup = $('qr-popup');
+    
+    if (qrToggle && qrPopup) {
+        qrToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            qrPopup.classList.toggle('active');
+        });
+        
+        // Fermer au clic ailleurs
+        document.addEventListener('click', (e) => {
+            if (!qrToggle.contains(e.target) && !qrPopup.contains(e.target)) {
+                qrPopup.classList.remove('active');
+            }
+        });
+    }
+    $('info-overlay-close').addEventListener('click', () => closeOverlay());
+
+    $('info-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'info-overlay') closeOverlay();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && $('info-overlay').classList.contains('active')) closeOverlay();
+    });
+});
+
+function selectMode(mode) {
+    state.mode = mode;
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+    $(`mode-${mode}`).classList.add('selected');
+    $('btn-configure').disabled = false;
+}
+
+async function configureQuiz() {
+    if (!state.mode) return;
+
+    $('btn-configure').disabled = true;
+    $('btn-configure').textContent = '⏳ Configuration...';
+
+    try {
+        // Pour le mode loop, démarrer immédiatement
+        if (state.mode === 'loop') {
+            await startQuizLoop();
+            return;
+        }
+
+        // ✅ MODE SESSION : EFFACER le startTime pour réinitialiser
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST', 
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'resetStartTime'
+            })
+        });
+
+        console.log('🗑️ StartTime effacé');
+        
+        // Attendre que le Sheet soit à jour
+        await new Promise(r => setTimeout(r, 1000));
+
+        // ✅ SEULEMENT ÉCRIRE LE MODE (sans startTime)
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST', 
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'setMode',  // ← NOUVELLE ACTION
+                mode: 'session' 
+            })
+        });
+
+        console.log('✅ Mode session configuré (sans startTime)');
+        
+        // Afficher l'écran d'attente
+        $('mode-selector').style.display = 'none';
+        $('btn-configure').style.display = 'none';
+        $('loading-info').style.display = 'none';
+        $('ready-screen').style.display = 'block';
+        
+        state.configured = true;
+        // Warm-up silencieux pendant l'attente participants
+        setInterval(() => fetch(`${CONFIG.sheetUrl}?action=getFullConfig`).catch(()=>{}), 60000);
+        
+        // Rafraîchir le compteur
+        setInterval(updateReadyCount, 5000);
+        updateReadyCount();
+        
+    } catch (e) {
+        console.error('Erreur configuration:', e);
+        $('btn-configure').disabled = false;
+        $('btn-configure').textContent = '⚙️ Configurer';
+    }
+}
+
+async function updateReadyCount() {
+    if (!state.configured) return;
+    
+    try {
+        const response = await fetch(`${CONFIG.sheetUrl}?action=getParticipants`);
+        const data = await response.json();
+        
+        // ✅ En phase d'attente, compter TOUS les participants (actifs + inactifs)
+        const totalWaiting = data.counts.grandTotal || data.counts.total || 0;
+        
+        console.log('📊 Participants en attente:', totalWaiting, 'détails:', data.counts);
+        
+        $('ready-count').textContent = totalWaiting;
+    } catch (e) {
+        console.error('Erreur comptage participants:', e);
+    }
+}
+
+async function startQuizNow() {
+    $('btn-start-now').disabled = true;
+    $('btn-start-now').textContent = '⏳ Démarrage...';
+
+    const startedAt = Date.now();
+
+    try {
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST', 
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'startSession', mode: 'session' })
+        });
+
+        console.log('Commande startSession envoyée');
+
+        // ✅ Marquer tous les participants en attente avec le startTime de session
+        // Évite que chaque participant fasse un re-register concurrent
+        await new Promise(r => setTimeout(r, 1500)); // Laisser le temps au startTime d'être écrit
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'markSessionParticipants', startTime: startedAt })
+        });
+        console.log('✅ markSessionParticipants envoyé avec startTime =', startedAt);
+        
+        // Après :
+state.referenceTime = startedAt;
+
+        state.isFirstQuestion = true;
+        state.lastScoreTimestamp = Date.now();
+
+    } catch (e) {
+        console.error('Erreur démarrage:', e);
+        state.referenceTime = startedAt;
+        state.isFirstQuestion = true;
+    }
+
+    console.log('Session démarrée:', {
+        mode: state.mode,
+        referenceTime: state.referenceTime,
+        currentTime: Date.now(),
+        diff: Date.now() - state.referenceTime
+    });
+
+    $('mode-badge').textContent = 'Mode Atelier';
+    $('start-screen').classList.add('hidden');
+    $('main-screen').classList.add('active');
+
+    fetchData();
+    startLoop();
+}
+async function resetQuiz() {
+    if (!confirm('⚠️ Voulez-vous vraiment effacer toutes les données de l\'atelier précédent ?\n\nCeci supprimera :\n- Tous les participants\n- Toutes les réponses\n- Tous les scores\n\nCette action est irréversible.')) {
+        return;
+    }
+
+    $('btn-reset').disabled = true;
+    $('btn-reset').textContent = '⏳ Réinitialisation...';
+
+    try {
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'resetSession' })
+        });
+
+        await new Promise(r => setTimeout(r, 2000));
+        
+        alert('✅ Atelier réinitialisé avec succès !');
+        location.reload();
+    } catch (e) {
+        console.error('Erreur reset:', e);
+        alert('❌ Erreur lors de la réinitialisation');
+        $('btn-reset').disabled = false;
+        $('btn-reset').textContent = '🗑️ Réinitialiser l\'atelier';
+    }
+}
+async function startQuizLoop() {
+    // Mode loop = démarrage immédiat comme avant
+    const startedAt = Date.now();
+
+    try {
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST', 
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'startSession', mode: 'loop' })
+        });
+
+        await new Promise(r => setTimeout(r, 2000));
+        await loadConfigFromSheet();
+        
+        if (SETTINGS.startTime) {
+            state.referenceTime = SETTINGS.startTime;
+        } else {
+            state.referenceTime = startedAt;
+        }
+
+    } catch (e) {
+        console.error('Erreur démarrage:', e);
+        state.referenceTime = startedAt;
+    }
+
+    $('mode-badge').textContent = 'Mode Va-et-vient';
+    $('start-screen').classList.add('hidden');
+    $('main-screen').classList.add('active');
+
+    startLoop();
+}
+
+        function startLoop() {
+            update();
+            setInterval(update, 500);
+            setInterval(fetchData, 30000);
+        }
+
+        function update() {
+    const now = Date.now();
+    
+    // COUNTDOWN 5 secondes
+    // Période firstQuestionDelay : countdown avant Q1
+    const elapsed = (now - state.referenceTime) / 1000;
+    if (SETTINGS.mode === 'session' && SETTINGS.firstQuestionDelay > 0 && elapsed < SETTINGS.firstQuestionDelay) {
+        // Recalage unique sur le vrai startTime GAS
+        if (!state.recalibrated && elapsed > 3) {
+            state.recalibrated = true;
+            loadConfigFromSheet().then(() => {
+                if (SETTINGS.startTime && Math.abs(SETTINGS.startTime - state.referenceTime) > 500) {
+                    console.log(`🔧 Recalage: ${state.referenceTime} → ${SETTINGS.startTime}`);
+                    state.referenceTime = SETTINGS.startTime;
+                }
+            }).catch(() => {});
+        }
+        const remaining = Math.ceil(SETTINGS.firstQuestionDelay - elapsed);
+        $('question-text').textContent = `⏳ Le quiz commence dans ${remaining} seconde${remaining > 1 ? 's' : ''}...`;
+        $('question-timer').textContent = remaining;
+        $('question-timer').className = 'question-timer warning';
+        $('phase-badge').textContent = '⏱️ Préparation';
+        $('phase-badge').className = 'phase-indicator vote';
+        $('q-num').textContent = '1';
+        $('options-grid').innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; font-size: 1.2rem; opacity: 0.7;">
+                10 questions pour découvrir ce que l'écologie peut vous faire économiser et gagner en santé.<br>
+                <small style="font-size: 0.9rem; opacity: 0.6;">Votez en équipe · ${SETTINGS.voteDuration}s pour voter · ${SETTINGS.explainDuration}s d'explication</small>
+            </div>
+        `;
+        return;
+    }
+    
+    // QUIZ NORMAL
+    const quizState = getQuizState(state.referenceTime);
+
+if (quizState.finished) {
+        // ✅ Fermer l'overlay info qui pourrait rester ouvert depuis explain Q10
+        if ($('info-overlay').classList.contains('active')) {
+            closeOverlay();
+        }
+        showEndScreen();
+        return;
+    }
+
+    if (quizState.questionIndex !== state.lastQuestionIndex) {
+        state.lastQuestionIndex = quizState.questionIndex;
+        state.lastPhase = null;
+        onQuestionChange(quizState);
+    }
+
+    updateTimers(quizState);
+    updatePhase(quizState);
+if (!state.recalibrated2 && quizState.questionIndex === 0 && quizState.phase === 'vote' && quizState.timeRemaining < (SETTINGS.voteDuration - 5)) {
+        state.recalibrated2 = true;
+        loadConfigFromSheet().then(() => {
+            if (SETTINGS.startTime && Math.abs(SETTINGS.startTime - state.referenceTime) > 500) {
+                console.log(`🔧 Recalage Q1 vote: ${state.referenceTime} → ${SETTINGS.startTime}`);
+                state.referenceTime = SETTINGS.startTime;
+            }
+        }).catch(() => {});
+    }
+   // Détection transition vote → explain
+if (quizState.phase === 'explain' && state.lastPhase === 'vote') {
+    const tour = getCurrentTour(state.referenceTime);
+    const scoreKey = `Q${quizState.questionIndex}-T${tour}`;
+    
+   if (!state.scoreTriggered[scoreKey]) {
+        state.scoreTriggered[scoreKey] = true;
+       const scoreDelay = 45000;
+        setTimeout(() => triggerScoreCalculation(quizState), scoreDelay);
+    }
+}
+    
+    state.lastPhase = quizState.phase;
+}
+
+async function triggerScoreCalculation(quizState) {
+    const q = quizState.currentQuestion;
+    if (!q) return;
+    const tour = getCurrentTour(state.referenceTime);
+    
+    console.log('🎯 Calcul score Q', q.id, 'tour', tour);
+    state.scoreCalculating = true;
+    state.pendingScores = null;
+
+    try {
+        // POST immédiat
+        await fetch(CONFIG.sheetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'calculateTurnScore', 
+                questionId: parseInt(q.id), 
+                tour: parseInt(tour) 
+            })
+        });
+        
+        console.log('✅ calculateTurnScore envoyé, lecture scores dans 10s');
+
+        // Première lecture à T+10 après la transition
+        await new Promise(r => setTimeout(r, 10000));
+        await tryFetchScores('tentative 1');
+
+        // Si pas encore prêt, fallback 6s plus tard
+        if (!state.pendingScores) {
+            await new Promise(r => setTimeout(r, 6000));
+            await tryFetchScores('tentative 2');
+        }
+
+        // ✅ PANSEMENT Q1/Q2 : si aucune réponse détectée sur les 2 premières questions,
+        // attribuer 1 point à chaque équipe pour maintenir la dynamique côté participants
+        if (quizState.questionIndex <= 2) {
+            const statsRes = await fetch(`${CONFIG.sheetUrl}?action=getStats&questionId=${parseInt(q.id)}&tour=${parseInt(tour)}`);
+            const stats = await statsRes.json();
+            const totalResponses = stats.total || 0;
+            
+            if (totalResponses === 0) {
+                console.warn(`⚠️ Aucune réponse détectée pour Q${q.id}. Application du pansement : +1 à chaque équipe.`);
+                
+                // Écrire dans le Sheet Scores pour persister le pansement côté serveur
+                await fetch(CONFIG.sheetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'injectPansementScore',
+                        questionId: parseInt(q.id),
+                        tour: parseInt(tour)
+                    })
+                });
+                
+                // Mettre à jour l'affichage immédiatement (pas d'attente sur le serveur)
+                const currentBlue = parseInt($('score-blue').textContent) || 0;
+                const currentRed = parseInt($('score-red').textContent) || 0;
+                state.pendingScores = {
+                    blue: currentBlue + 1,
+                    red: currentRed + 1
+                };
+                state.scoreCalculating = false;
+                
+                // Forcer le lastScoreTimestamp pour que les getScores suivants ne l'écrasent pas immédiatement
+                // (le Sheet aura bien été mis à jour avec +1/+1 côté serveur d'ici la prochaine question)
+                state.lastScoreTimestamp = Date.now();
+            }
+        }
+
+    } catch (e) {
+        console.error('❌ Erreur calcul score:', e);
+        state.scoreCalculating = false;
+    }
+}
+async function tryFetchScores(label) {
+    try {
+        const res = await fetch(`${CONFIG.sheetUrl}?action=getScores`);
+        const data = await res.json();
+
+        const lastCalcTime = data.details && data.details.length > 0
+            ? Math.max(...data.details.map(d => d.timestamp))
+            : 0;
+
+        console.log(`📊 ${label} - lastCalcTime: ${lastCalcTime}, lastScoreTimestamp: ${state.lastScoreTimestamp}`);
+
+        if (lastCalcTime > state.lastScoreTimestamp || (lastCalcTime === 0 && (data.blue > 0 || data.red > 0))) {
+            state.pendingScores = data;
+            state.lastScoreTimestamp = lastCalcTime;
+            state.scoreCalculating = false;
+            console.log(`✅ Scores frais confirmés: bleu=${data.blue}, rouge=${data.red}`);
+        } else {
+            console.warn(`⚠️ ${label} - scores pas encore mis à jour`);
+        }
+    } catch (e) {
+        console.error(`❌ Erreur ${label}:`, e);
+    }
+}
+        
+
+        function onQuestionChange(quizState) {
+    const q = quizState.currentQuestion;
+    if (!q) return;
+
+    console.log(`📌 Nouvelle question: Q${quizState.questionIndex + 1}`);
+
+    $('q-num').textContent = quizState.questionIndex + 1;
+    $('question-text').textContent = q.text;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    $('options-grid').innerHTML = q.options.map((opt, i) => `
+    <div class="option-card" data-index="${i}">
+        <div class="option-letter">${letters[i]}</div>
+        <div class="option-text">${opt}</div>
+        <!-- Compteurs et barres supprimés -->
+    </div>
+`).join('');
+
+    // Masquer l'info au changement de question
+    $('info-section').classList.remove('active');
+    
+    // 🚀 PRÉCHARGER LE CONTENU pendant la phase de vote
+    preloadQuestionInfo(q);
+}
+
+        function updateTimers(quizState) {
+    const timer = $('question-timer');
+    timer.textContent = formatTime(quizState.timeRemaining);
+    timer.className = 'question-timer';
+    if (quizState.phase === 'vote') {
+        if (quizState.timeRemaining <= 10) timer.classList.add('danger');
+        else if (quizState.timeRemaining <= 30) timer.classList.add('warning');
+    }
+
+    const elapsed = quizState.totalElapsed;
+    $('master-timer').textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
+
+    // Mise à jour de la barre de progression dans le header
+    const totalCycle = SETTINGS.voteDuration + SETTINGS.explainDuration;
+    const votePercent = (SETTINGS.voteDuration / totalCycle) * 100;
+    const explainPercent = (SETTINGS.explainDuration / totalCycle) * 100;
+
+    $('timer-phase-label-top').textContent = quizState.phase === 'vote' ? '⏱️ Solution dans...' : '💡 Discussion';
+    $('timer-countdown-top').textContent = formatTime(quizState.timeRemaining);
+
+    if (quizState.phase === 'vote') {
+        const el = SETTINGS.voteDuration - quizState.timeRemaining;
+        const filledPercent = (el / SETTINGS.voteDuration) * votePercent;
+        $('timer-bar-vote-top').style.width = `${votePercent - filledPercent}%`;
+        $('timer-bar-explain-top').style.width = `${explainPercent}%`;
+    } else {
+        const el = SETTINGS.explainDuration - quizState.timeRemaining;
+        const filledPercent = (el / SETTINGS.explainDuration) * explainPercent;
+        $('timer-bar-vote-top').style.width = '0%';
+        $('timer-bar-explain-top').style.width = `${explainPercent - filledPercent}%`;
+    }
+}
+
+        function updatePhase(quizState) {
+    const q = quizState.currentQuestion;
+    if (!q) return;
+
+    const badge = $('phase-badge');
+    badge.className = `phase-indicator ${quizState.phase}`;
+    badge.textContent = quizState.phase === 'vote' ? '⏱️ Vote en cours' : '💡 Explication';
+
+    if (quizState.phase === 'explain') {
+        // ✅ Révéler la réponse immédiatement
+        revealAnswer(q.correct);
+        
+        // ✅ Vérifier si overlay déjà affiché pour cette question
+        const overlayActive = $('info-overlay').classList.contains('active');
+        
+        if (!overlayActive) {
+            // Attendre 3 secondes avant d'afficher l'overlay
+            setTimeout(() => {
+                const content = state.preloadedContent[q.id] || q.info || '<p>Information non disponible.</p>';
+                $('info-body-overlay').innerHTML = content;
+                $('info-overlay').classList.add('active');
+                setTimeout(() => {
+                    $('info-overlay').scrollTop = 0;
+                }, 50);
+                console.log('✅ Overlay affiché');
+            }, 3000);
+        }
+        
+   } else {
+        // Phase vote : tout cacher
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('correct', 'wrong'));
+       if ($('info-overlay').classList.contains('active')) {
+            closeOverlay();
+        }
+    }
+}
+
+        function revealAnswer(correctIndex) {
+            document.querySelectorAll('.option-card').forEach((card, i) => {
+                card.classList.toggle('correct', i === correctIndex);
+                card.classList.toggle('wrong', i !== correctIndex);
+            });
+        }
+
+async function fetchData() {
+    try {
+        if (!QUESTIONS || QUESTIONS.length === 0) return;
+
+        const [participantsRes] = await Promise.all([
+            fetch(`${CONFIG.sheetUrl}?action=getParticipants`)
+        ]);
+
+        const participants = await participantsRes.json();
+
+        $('total-participants').textContent = participants.counts.total || 0;
+        $('members-blue').textContent = participants.counts.blue || 0;
+        $('members-red').textContent = participants.counts.red || 0;
+
+    } catch (e) { 
+        console.error('❌ Erreur fetch data:', e); 
+    }
+}
+
+        function showEndScreen() {
+            $('main-screen').classList.remove('active');
+            $('end-screen').classList.add('active');
+
+            const blueScore = parseInt($('score-blue').textContent) || 0;
+            const redScore = parseInt($('score-red').textContent) || 0;
+
+            $('end-score-blue').textContent = blueScore;
+            $('end-score-red').textContent = redScore;
+
+            const winner = $('end-winner');
+            if (blueScore > redScore) {
+                winner.className = 'end-winner blue';
+                winner.textContent = '🚌 Victoire Équipe Bleue !';
+            } else if (redScore > blueScore) {
+                winner.className = 'end-winner red';
+                winner.textContent = '🚋 Victoire Équipe Rouge !';
+            } else {
+                winner.className = 'end-winner tie';
+                winner.textContent = '🤝 Égalité parfaite !';
+            }
+        }
+        /**
+ * Précharge le contenu HTML d'une question depuis GitHub
+ * Appelé pendant la phase de vote pour éviter toute latence
+ */
+async function preloadQuestionInfo(question) {
+    if (!question || !question.infoUrl) {
+        console.log('⚠️ Pas d\'URL info pour cette question');
+        return null;
+    }
+
+    // Si déjà en cache, ne pas recharger
+    if (state.preloadedContent[question.id]) {
+        console.log(`✅ Contenu Q${question.id} déjà en cache`);
+        return state.preloadedContent[question.id];
+    }
+
+    try {
+        console.log(`🔄 Préchargement contenu Q${question.id}...`);
+        
+        const response = await fetch(question.infoUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const html = await response.text();
+        
+        // Stocker en cache
+        state.preloadedContent[question.id] = html;
+        
+        console.log(`✅ Contenu Q${question.id} préchargé et mis en cache`);
+        return html;
+        
+    } catch (error) {
+        console.error(`❌ Erreur préchargement Q${question.id}:`, error);
+        
+        // Fallback sur le champ info si disponible
+        if (question.info) {
+            console.log(`↩️ Fallback sur le champ info pour Q${question.id}`);
+            state.preloadedContent[question.id] = question.info;
+            return question.info;
+        }
+        
+        return `<p style="color:#E53935; text-align:center;">⚠️ Impossible de charger le contenu pédagogique.<br><small style="opacity:0.7;">${error.message}</small></p>`;
+    }
+}
+/**
+ * Fonctions utiles pour les questions
+ */
+        
+// Utilisée par toutes les questions
+function toggleDetail(btn) {
+    const panel = btn.nextElementSibling;
+    if (!panel || !panel.classList.contains('detail-panel')) return;
+    const arrow = btn.querySelector('span');
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
+}
+
+// Utilisée uniquement par Q2
+const COUTS = {
+  thermique: { 5000: 0.46, 10000: 0.37, 15000: 0.29, 20000: 0.25 },
+  elec:      { 5000: 0.28, 10000: 0.26, 15000: 0.21, 20000: 0.19 },
+  kdm:       { 5000: 0.29, 10000: 0.27, 15000: 0.22, 20000: 0.20 }
+};
+
+function calculate(km, btn) {
+  document.querySelectorAll('.km-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const thermique = Math.round(km * COUTS.thermique[km] / 100) * 100;
+  const elec      = Math.round(km * COUTS.elec[km] / 100) * 100;
+  const kdm       = Math.round(km * COUTS.kdm[km] / 100) * 100;
+  const economie  = thermique - kdm;
+  document.getElementById('res-thermique').textContent = thermique.toLocaleString('fr-FR') + ' €';
+  document.getElementById('res-elec').textContent      = elec.toLocaleString('fr-FR') + ' €';
+  document.getElementById('res-kdm').textContent       = kdm.toLocaleString('fr-FR') + ' €';
+  document.getElementById('kdm-badge').textContent     =
+      `⚡ Recharge KDM à 0,20 €/kWh — comme un particulier en heures creuses, bien moins qu'une borne publique (0,40 €/kWh)`;
+  const result = document.getElementById('calc-result');
+  result.classList.remove('visible');
+  void result.offsetWidth;
+  result.classList.add('visible');
+}
+        function applyScores(scoresData) {
+    const newBlue = scoresData.blue || 0;
+    const newRed = scoresData.red || 0;
+    const prevBlue = parseInt($('score-blue').dataset.prev || 0);
+    const prevRed = parseInt($('score-red').dataset.prev || 0);
+
+    $('score-blue').textContent = newBlue;
+    $('score-red').textContent = newRed;
+    $('score-blue').dataset.prev = newBlue;
+    $('score-red').dataset.prev = newRed;
+
+    if (newBlue > prevBlue) {
+        $('card-blue').classList.add('scoring');
+        setTimeout(() => $('card-blue').classList.remove('scoring'), 800);
+    }
+    if (newRed > prevRed) {
+        $('card-red').classList.add('scoring');
+        setTimeout(() => $('card-red').classList.remove('scoring'), 800);
+    }
+
+    $('card-blue').classList.toggle('leading', newBlue > newRed);
+    $('card-red').classList.toggle('leading', newRed > newBlue);
+}
+/**
+ * Affiche le contenu préchargé (ou charge si pas encore fait)
+ */
+function displayQuestionInfo(question) {
+    const content = state.preloadedContent[question.id];
+    
+    if (content) {
+        // Contenu déjà en cache
+        $('info-body-overlay').innerHTML = content;
+        console.log(`📺 Affichage contenu Q${question.id} depuis le cache`);
+    } else {
+        // Pas encore préchargé
+        console.warn(`⚠️ Contenu Q${question.id} pas préchargé, chargement à la volée...`);
+        $('info-body-overlay').innerHTML = `
+            <div style="text-align:center; padding:2rem;">
+                <div style="font-size:2rem; animation: spin 1s linear infinite;">⏳</div>
+                <div style="margin-top:0.5rem;">Chargement...</div>
+            </div>
+        `;
+        
+        // Charger à la volée
+        preloadQuestionInfo(question).then(html => {
+            if (html) $('info-body-overlay').innerHTML = html;
+        });
+    }
+}
+
+function closeOverlay() {
+    $('info-overlay').classList.remove('active');
+    if (state.pendingScores) {
+        applyScores(state.pendingScores);
+        state.pendingScores = null;
+    } else if (!state.scoreCalculating) {
+        // Secours : si pendingScores null et calcul terminé, forcer un fetch
+        fetch(`${CONFIG.sheetUrl}?action=getScores`)
+            .then(r => r.json())
+            .then(data => applyScores(data))
+            .catch(e => console.error('❌ Erreur fetch secours:', e));
+    }
+}
+        
+    </script>
+  <!-- Overlay info pédagogique -->
+    <div class="info-overlay" id="info-overlay">
+        <div class="info-overlay-header">
+            <div class="info-overlay-title">
+                💡 Le saviez-vous ?
+            </div>
+            <button class="info-overlay-close" id="info-overlay-close">
+                ✕ Fermer
+            </button>
+        </div>
+        <div class="info-overlay-content">
+            <div class="info-body" id="info-body-overlay">
+                <div style="text-align:center; padding:2rem;">
+                    <div style="font-size:2rem;">⏳</div>
+                    <div>Chargement du contenu...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>  
+</html>
