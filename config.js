@@ -1,9 +1,9 @@
 /**
- * Configuration du Quiz Éco KDM
+ * Configuration du Quiz Éco Divia
  * v5 - Ajout getCurrentTour(), gestion fin de quiz, trigger calcul scores
  */
 const CONFIG = {
-    sheetUrl: 'https://script.google.com/macros/s/AKfycbzE4npctaZ7I7bZfyTCdxkZACe3jFfaqDlEUzPo2Z0hb71cGirnjiL1OH5nbdFpxYGm8w/exec'
+    sheetUrl: 'https://script.google.com/macros/s/AKfycbxiiCKOThfhG5BRF2DkKlbF9p5QL5YTSF7Os2QXZaw_9Co2Hz-AnIf4hqcNWjJ8ZINV/exec'
 };
 
 let QUESTIONS = [];
