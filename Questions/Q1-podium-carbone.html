@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Q4 - Le Podium Carbone v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #1a1030;
+    color: white;
+    padding: 2rem;
+    margin: 0;
+  }
+
+  /* ── BLOC PRINCIPAL (affiché en session) ─────────────────── */
+
+  .main-block { max-width: 680px; margin: 0 auto; }
+
+  .choc {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: rgba(210,0,122,0.12);
+    border: 1px solid rgba(210,0,122,0.3);
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .choc strong { color: #D2007A; font-size: 1.25rem; }
+
+  /* Barres */
+  .podium-row { margin-bottom: 0.65rem; }
+  .row-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  .bar-track {
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    height: 28px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-weight: 800;
+    font-size: 0.82rem;
+  }
+
+  /* Takeaway */
+  .takeaway {
+    border-left: 4px solid #D2007A;
+    background: rgba(210,0,122,0.08);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 1rem;
+    margin-top: 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+	margin-bottom: 0.8rem;
+  }
+   /* Sources */
+  .sources {
+    padding: 0.6rem 0.9rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    line-height: 1.6;
+    margin-bottom: 0.3rem;
+  }
+  .sources strong { opacity: 1; color: rgba(255,255,255,0.7); }
+
+  /* ── BOUTON "EN SAVOIR PLUS" ─────────────────────────────── */
+  .btn-more {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.65rem 1rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.75);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .btn-more:hover { background: rgba(210,0,122,0.15); border-color: #D2007A; color: white; }
+  .btn-more .arrow { display: inline-block; transition: transform 0.25s ease; margin-left: 0.4rem; }
+  .btn-more.open .arrow { transform: rotate(180deg); }
+
+  /* ── PANNEAU DÉTAIL (masqué par défaut) ───────────────────── */
+  .detail-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  .detail-panel.open {
+    max-height: 600px;
+    opacity: 1;
+  }
+  .detail-inner {
+    margin-top: 0.8rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+  }
+  .detail-inner h4 {
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.9rem;
+  }
+
+  /* Tags bénéfices */
+  .tag-row { margin-bottom: 0.8rem; }
+  .tag-label { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.35rem; }
+  .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+  }
+  .tag.money { background: rgba(255,193,7,0.15); color: #FFD54F; border: 1px solid rgba(255,193,7,0.25); }
+  .tag.health { background: rgba(67,160,71,0.15); color: #81C784; border: 1px solid rgba(67,160,71,0.25); }
+  .tag.info   { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.1); font-style: italic; font-weight: 600; }
+
+  .objection {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin-top: 0.5rem;
+  }
+  .objection .q { font-style: italic; opacity: 0.7; margin-bottom: 0.35rem; }
+  .objection .r { font-weight: 700; color: #D2007A; }
+
+  /* ── SCRIPT ANIMATEUR (hors session) ─────────────────────── */
+  .script-block {
+    max-width: 680px;
+    margin: 2.5rem auto 0;
+    background: rgba(255, 193, 7, 0.06);
+    border: 1px dashed rgba(255,193,7,0.35);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+  }
+  .script-block h4 {
+    color: #FFD54F;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+  }
+  .script-line {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    align-items: flex-start;
+  }
+  .timing {
+    background: rgba(255,193,7,0.15);
+    color: #FFD54F;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+  }
+  .script-text { font-size: 0.93rem; line-height: 1.55; }
+  .script-text em { color: #D2007A; font-style: normal; font-weight: 800; }
+  .script-text .aside { display: block; margin-top: 0.25rem; opacity: 0.45; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     BLOC PRINCIPAL - à injecter dans info-body de Q1
+============================================================ -->
+<div class="main-block">
+
+  <!-- Chiffre choc : le contre-intuitif qui ouvre tout -->
+  <div class="choc">
+    Le numérique ? <strong>2 à 4% seulement.</strong><br>
+    Votre voiture, elle, représente <strong style="color:#E53935;">~30%</strong> - parce qu'elle brûle de l'énergie à chaque kilomètre.<br>
+    <span style="opacity:0.85; font-size:0.95rem;">Et l'énergie, ça coûte cher.</span>
+  </div>
+
+  <!-- Barres épurées -->
+  <div class="podium-row">
+    <div class="row-header">
+      <span>🥇 🚗 Mobilité</span>
+      <span style="color:#E53935;">~30%</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:100%; background:linear-gradient(90deg,#D2007A,#E53935);">N°1</div>
+    </div>
+  </div>
+
+  <div class="podium-row">
+    <div class="row-header">
+      <span>🥈 🍖 Alimentation</span>
+      <span style="color:#FFA726;">~25%</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:83%; background:linear-gradient(90deg,#FFA726,#FF7043);"></div>
+    </div>
+  </div>
+
+  <div class="podium-row">
+    <div class="row-header">
+      <span>🥉 🏠 Logement / Chauffage</span>
+      <span style="color:#42A5F5;">~20%</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:67%; background:linear-gradient(90deg,#42A5F5,#1E88E5);"></div>
+    </div>
+  </div>
+
+  <div class="podium-row">
+    <div class="row-header">
+      <span>4️⃣ 📱 Numérique</span>
+      <span style="color:#66BB6A;">2–4%</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width:13%; background:linear-gradient(90deg,#66BB6A,#43A047);"></div>
+    </div>
+  </div>
+
+  <!-- Takeaway unique -->
+  <div class="takeaway">
+    <strong>💡 La clé :</strong> CO₂ = énergie consommée = argent dépensé. Ce sont les mêmes euros.<br>
+    <span style="opacity:0.85;">Les postes qui pèsent le plus dans votre empreinte sont exactement ceux qui pèsent le plus dans votre budget. Ce n'est pas une coïncidence - c'est mécanique.</span>
+  </div>
+  
+   <!-- Sources -->
+  <div class="sources">
+    <strong>Sources :</strong>
+    ADEME - Base carbone, empreinte carbone d'un Français moyen (2022) ·
+	Carbone 4 / The Shift Project - répartition de l'empreinte individuelle française
+  </div>
+
+  <!-- Bouton expandable -->
+  <button class="btn-more" onclick="toggleDetail(this)">
+    💬 Réponses aux questions fréquentes <span id="arrow">▼</span>
+</button>
+
+  <!-- Panneau détail -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-inner">
+      <h4>Pour aller plus loin - Ce que cache chaque poste</h4>
+
+      <div class="tag-row">
+        <div class="tag-label">🚗 Mobilité</div>
+        <div class="tags">
+          <span class="tag money">💰 0,35–0,50 € / km tout compris</span>
+          <span class="tag money">💰 Jusqu'à 900 € / an remboursés par l'employeur</span>
+          <span class="tag health">❤️ 30 min vélo / jour = risque cardio divisé par 2</span>
+        </div>
+      </div>
+
+      <div class="tag-row">
+        <div class="tag-label">🍖 Alimentation</div>
+        <div class="tags">
+          <span class="tag money">💰 Mêmes protéines, 8× moins cher avec les légumineuses</span>
+          <span class="tag health">❤️ Réduire la viande rouge : risque cancer colorectal -18%</span>
+        </div>
+      </div>
+
+      <div class="tag-row">
+        <div class="tag-label">🏠 Logement</div>
+        <div class="tags">
+          <span class="tag money">💰 -3°C = jusqu'à 600 € / an sur la facture</span>
+          <span class="tag health">❤️ Chambre à 16–17°C : meilleur sommeil, immunité renforcée</span>
+        </div>
+      </div>
+
+      <div class="tag-row">
+        <div class="tag-label">📱 Numérique</div>
+        <div class="tags">
+          <span class="tag money">💰 Garder son tel 2 ans de plus = 400 € économisés</span>
+          <span class="tag info">ℹ️ La fabrication pèse 80% de l'impact - pas le streaming</span>
+        </div>
+      </div>
+
+      <!-- Objection type -->
+      <div class="objection">
+        <div class="q">« Je m'en fous du CO₂, ça ne me concerne pas. »</div>
+        <div class="r">Pas de souci - ce quiz parle surtout d'argent et de santé. Le CO₂, c'est juste le thermomètre qu'on utilise pour mesurer. Ce qui compte pour vous, c'est ce que ça vous coûte.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
